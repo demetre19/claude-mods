@@ -12,6 +12,7 @@ import type { EngineInterface, Register } from 'claude-code'
 import type { Gauge, Phase } from '../types'
 
 const PLUGIN = 'self-compact'
+const TOGGLE = 'self-compact-toggle'
 const TOOL = 'self_compact'
 const VIEW = 'view_context'
 const TOOL_FULL = `mcp__${PLUGIN}__${TOOL}`
@@ -135,6 +136,9 @@ function bar(g: Gauge): string {
 let settings: Settings = DEFAULTS
 let isNoticeArmed = true
 let timer: { cancel: () => void } | undefined
+// In-memory override from /self-compact-toggle on|off: survives per-turn
+// loadSettings() re-reads, cleared by reload or a status-file change.
+let enabledOverride: boolean | undefined
 
 async function pendingKey($: EngineInterface) {
   return `pending:${await $.session.id()}`
@@ -146,22 +150,23 @@ async function setPending($: EngineInterface, p: Pending | null) {
   const key = await pendingKey($)
   return p ? $.store.set(key, p) : $.store.delete(key)
 }
-
 async function loadSettings($: EngineInterface) {
   // First file wins: project override, then the one shipped beside the plugin.
+  // A toggle on|off override survives these re-reads until reload clears it.
   for (const path of ['.claude/self-compact.json', `${$.plugin.root}/self-compact.json`]) {
     const text = await $.fs.read(path).catch(() => undefined)
     if (typeof text !== 'string') continue
     try {
       settings = { ...DEFAULTS, ...(JSON.parse(text) as Partial<Settings>) }
+      if (enabledOverride !== undefined) settings.enabled = enabledOverride
       return
     } catch {
       $.ui.toast(`self-compact: ${path} is not valid JSON; using defaults`)
     }
   }
   settings = DEFAULTS
+  if (enabledOverride !== undefined) settings.enabled = enabledOverride
 }
-
 async function isActive($: EngineInterface) {
   return settings.enabled && !(await read($, isOff))
 }
@@ -239,6 +244,26 @@ function schedule($: EngineInterface, ms: number) {
   timer?.cancel()
   timer = $.clock.after(ms, () => runCompaction($))
 }
+async function statusText($: EngineInterface): Promise<string> {
+  const g = await refresh($)
+  const state = !settings.enabled ? 'disabled in settings' : (await read($, isOff)) ? 'OFF (this session)' : 'ON'
+  return `self-compact ${state} · ${bar(g)} ${fmt(g.tokens)}/${fmt(g.window)} · notice ${fmt(g.soft)} · warning ${fmt(g.warn)} · forced ${fmt(g.forced)}`
+}
+
+async function runToggle($: EngineInterface, arg: string) {
+  if (arg === 'off' || arg === 'on') {
+    enabledOverride = arg === 'on'
+    settings.enabled = enabledOverride
+    await update($, isOff, () => arg === 'off')
+  }
+  if (arg === 'reload') {
+    enabledOverride = undefined
+    await loadSettings($)
+  }
+  if (arg && !['on', 'off', 'reload', 'status'].includes(arg)) return { text: 'Usage: /self-compact [on|off|status|reload]' }
+  return { text: await statusText($) }
+}
+
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
@@ -261,6 +286,11 @@ export const register: Register = on => {
     await $.command.register({
       name: PLUGIN,
       description: 'Self-compact: on | off (this session) | status | reload (settings)',
+      argumentHint: '[on|off|status|reload]',
+    })
+    await $.command.register({
+      name: TOGGLE,
+      description: 'Self-compact toggle: flips self-compaction on/off, bare shows status',
       argumentHint: '[on|off|status|reload]',
     })
     const ran = await next(e)
@@ -339,14 +369,13 @@ export const register: Register = on => {
 
   on('command.run', { command: PLUGIN }, async ($, e) => {
     const arg = e.args.trim().toLowerCase()
-    if (arg === 'off' || arg === 'on') await update($, isOff, () => arg === 'off')
-    if (arg === 'reload') await loadSettings($)
-    if (arg && !['on', 'off', 'reload', 'status'].includes(arg)) return { text: 'Usage: /self-compact [on|off|status|reload]' }
-    const g = await refresh($)
-    const state = !settings.enabled ? 'disabled in settings' : (await read($, isOff)) ? 'OFF (this session)' : 'ON'
-    return {
-      text: `self-compact ${state} · ${bar(g)} ${fmt(g.tokens)}/${fmt(g.window)} · notice ${fmt(g.soft)} · warning ${fmt(g.warn)} · forced ${fmt(g.forced)}`,
-    }
+    return runToggle($, arg)
+  })
+
+  on('command.run', { command: TOGGLE }, async ($, e) => {
+    const arg = e.args.trim().toLowerCase()
+    if (!arg) return runToggle($, 'status')
+    return runToggle($, arg)
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {

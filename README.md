@@ -36,8 +36,7 @@ Thresholds resolve against `compactReferenceWindow` (default `1m`), so every mod
 ```json
 { "enabled": true, "compactSoftAt": "10%", "compactAt": "20%", "compactBuffer": "5%", "compactReferenceWindow": "1m" }
 ```
-
-`/self-compact [on|off|status|reload]` turns it off or on for this session, shows the numbers, or re-reads the settings.
+`/self-compact [on|off|status|reload]` turns it off or on for this session, shows the numbers, or re-reads the settings. `on`/`off` also flips the persisted `enabled` switch; `status` reports whether it is disabled in settings. `/self-compact-toggle [on|off|status|reload]` (bare = status) is the same switch under a conflict-free name.
 
 ## calm
 

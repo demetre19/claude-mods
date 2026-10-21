@@ -1,0 +1,10 @@
+{
+  "branch": "lane/resume-2",
+  "generated_at": "2026-10-21T06:33:34.881811+00:00",
+  "lane": "resume-2",
+  "manual": true,
+  "worktree": "/Users/apple/.prd-herdr/wt/modsrepo/resume-2",
+  "write_paths": [
+    "audit/CENSUS-resume-2.json"
+  ]
+}
