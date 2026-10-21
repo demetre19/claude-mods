@@ -1,1 +1,0 @@
-{"bypass_paths": ["."], "callsites": ["self-compact/hooks/register.tsx", "README.md", "reports/fallback-resume-test.md"], "class": "role-resume-probe", "class_key": "role-resume-probe", "lane": "resume-2", "siblings": ["self-compact/types/index.d.ts", "self-compact/self-compact.json", "calm/hooks/register.tsx"], "schema": "scope-census/v1"}
