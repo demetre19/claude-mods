@@ -1,0 +1,6 @@
+{
+  "name": "calm",
+  "version": "0.1.0",
+  "description": "Hides tool rows and mid-turn working notes so the transcript reads as prose; a little boat sails while Claude works. /calm toggles.",
+  "types": "./types/index.d.ts"
+}

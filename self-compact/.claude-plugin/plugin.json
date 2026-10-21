@@ -1,0 +1,6 @@
+{
+  "name": "self-compact",
+  "version": "0.1.0",
+  "description": "The agent manages its own context: notice/warning/forced thresholds, a self_compact tool with a note-to-self handoff, and a context gauge.",
+  "types": "./types/index.d.ts"
+}

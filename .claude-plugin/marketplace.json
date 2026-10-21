@@ -1,0 +1,16 @@
+{
+  "name": "claude-mods",
+  "owner": { "name": "demetre19" },
+  "plugins": [
+    {
+      "name": "self-compact",
+      "source": "./self-compact",
+      "description": "The agent manages its own context: notice/warning/forced thresholds, a self_compact tool with a note-to-self handoff, and a context gauge."
+    },
+    {
+      "name": "calm",
+      "source": "./calm",
+      "description": "Hides tool rows and mid-turn working notes so the transcript reads as prose; a little boat sails while Claude works. /calm toggles."
+    }
+  ]
+}

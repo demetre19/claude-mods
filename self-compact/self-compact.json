@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "compactSoftAt": "10%",
+  "compactAt": "20%",
+  "compactBuffer": "5%",
+  "compactReferenceWindow": "1m"
+}
