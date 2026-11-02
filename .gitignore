@@ -2,3 +2,9 @@
 */.claude-plugin/types/
 */tsconfig.json
 .DS_Store
+
+# of-machinery (managed)
+.ofm-crew-worktrees/
+.worktrees/
+.ofm-crew/
+# /of-machinery (managed)

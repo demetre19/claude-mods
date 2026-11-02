@@ -1,0 +1,24 @@
+{
+  "schema": "profile/v1",
+  "argv": {},
+  "module_map": {
+    ".": 2,
+    "audit": 1,
+    "calm": 3,
+    "forensics": 1,
+    "reports": 1,
+    "self-compact": 4
+  },
+  "hot_files": [],
+  "land_target": "sprint",
+  "max_parallel": 5,
+  "default_host": "2IC",
+  "protected_paths": [],
+  "docs": {
+    "machinery": "docs/machinery",
+    "decisions": "docs/decisions"
+  },
+  "file_line_cap": 800,
+  "machinery_root": "",
+  "tests_root": "tests"
+}
